@@ -68,8 +68,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 #   The non-interactive network downloader
 # curl
 #   transfer URL data using various Internet protocols
-RUN apt -qqy update \
-  && apt -qqy install \
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
     libltdl7 \
     netcat-openbsd \
     pwgen \
@@ -89,30 +89,31 @@ RUN apt -qqy update \
     pulseaudio \
     socat \
     alsa-utils \
-  && apt -qyy autoremove \
+    apt-transport-https \
+  && apt-get -qyy autoremove \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qyy clean
 
 #==============================
 # Locale and encoding settings
 #==============================
 # TODO: Allow to change instance language OS and Browser level
 #  see if this helps: https://github.com/rogaha/docker-desktop/blob/68d7ca9df47b98f3ba58184c951e49098024dc24/Dockerfile#L57
-ENV LANG_WHICH en
-ENV LANG_WHERE US
+ENV LANG_WHICH fr
+ENV LANG_WHERE FR
 ENV ENCODING UTF-8
 ENV LANGUAGE ${LANG_WHICH}_${LANG_WHERE}.${ENCODING}
 ENV LANG ${LANGUAGE}
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
-    language-pack-en \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
+    language-pack-fr \
     tzdata \
     locales \
   && locale-gen ${LANGUAGE} \
   && dpkg-reconfigure --frontend noninteractive locales \
-  && apt -qyy autoremove \
+  && apt-get -qqy autoremove \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #===================
 # Timezone settings
@@ -120,7 +121,7 @@ RUN apt -qqy update \
 # Full list at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 #  e.g. "US/Pacific" for Los Angeles, California, USA
 # e.g. ENV TZ "US/Pacific"
-ENV TZ="Europe/Berlin"
+ENV TZ="Europe/Paris"
 # Apply TimeZone
 RUN echo "Setting time zone to '${TZ}'" \
   && echo "${TZ}" > /etc/timezone \
@@ -150,14 +151,14 @@ RUN useradd seluser \
 # Regarding urandom see
 #  http://stackoverflow.com/q/26021181/511069
 #  https://github.com/SeleniumHQ/docker-selenium/issues/14#issuecomment-67414070
-RUN apt -qqy update \
-  && apt -qqy install \
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
     openjdk-8-jre-headless \
   && sed -i '/securerandom.source=/ s|/dev/u?random|/dev/./urandom|g' \
        /etc/java-*/security/java.security \
-  && apt -qyy autoremove \
+  && apt-get -qqy autoremove \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #===================================================
 # Run the following commands as non-privileged user
@@ -199,8 +200,8 @@ USER root
 #=========================================================
 # Python2 for Supervisor, selenium tests, and other stuff
 #=========================================================
-# RUN apt -qqy update \
-#   && apt -qqy --no-install-recommends install \
+# RUN apt-get -qqy update \
+#   && apt-get -qqy --no-install-recommends install \
 #     python2.7 \
 #     python-pip \
 #     python-openssl \
@@ -209,7 +210,7 @@ USER root
 #   && pip install --upgrade pip==9.0.3 \
 #   && pip install --upgrade setuptools \
 #   && rm -rf /var/lib/apt/lists/* \
-#   && apt -qyy clean
+#   && apt-get -qqy clean
 
 #=========================================================
 # Python3 for Supervisor, selenium tests, and other stuff
@@ -218,8 +219,8 @@ USER root
 #  NameError: name 'file' is not defined
 # After install, make some useful symlinks that are expected to exist
 COPY test/requirements.txt /test/
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
     python3 \
     python3-pip \
     python3-dev \
@@ -230,7 +231,7 @@ RUN apt -qqy update \
   && pip3 install --no-cache numpy \
   && pip3 install --no-cache --requirement /test/requirements.txt \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 RUN cd /usr/local/bin \
   && { [ -e easy_install ] || ln -s easy_install-* easy_install; } \
   && ln -s idle3 idle \
@@ -248,8 +249,8 @@ RUN cd /usr/local/bin \
 # Check every now and then if version 4 is finally the stable one
 #  https://pypi.python.org/pypi/supervisor
 #  https://github.com/Supervisor/supervisor
-# RUN apt -qqy update \
-#   && apt -qqy install \
+# RUN apt-get -qqy update \
+#   && apt-get -qqy install \
 #     supervisor \
 # 2018-09-28 commit: 837c159ae51f3b, supervisor/version.txt: 4.0.0.dev0
 # 2018-06-01 commit: ec495be4e28c69, supervisor/version.txt: 4.0.0.dev0
@@ -262,7 +263,7 @@ RUN SHA="837c159ae51f3bf12c1d30a8cb44f3450611983c" \
      pip install --no-cache \
       "https://github.com/Supervisor/supervisor/zipball/${SHA}" \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #================
 # Font libraries
@@ -274,8 +275,8 @@ RUN SHA="837c159ae51f3bf12c1d30a8cb44f3450611983c" \
 # xfonts-75dpi
 # Regarding fonts-liberation see:
 #  https://github.com/SeleniumHQ/docker-selenium/issues/383#issuecomment-278367069
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
     libfontconfig \
     libfreetype6 \
     xfonts-cyrillic \
@@ -285,30 +286,30 @@ RUN apt -qqy update \
     fonts-wqy-zenhei \
     ttf-ubuntu-font-family \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #=========
 # Openbox
 # A lightweight window manager using freedesktop standards
 #=========
 # Let's disable this as is only filling disk space
-# RUN apt -qqy update \
-#   && apt -qqy --no-install-recommends install \
+# RUN apt-get -qqy update \
+#   && apt-get -qqy --no-install-recommends install \
 #     openbox obconf menu \
 #   && rm -rf /var/lib/apt/lists/* \
-#   && apt -qyy clean
+#   && apt-get -qqy clean
 
 #=========
 # fluxbox
 # A fast, lightweight and responsive window manager
 #=========
 # xfce4-notifyd allows `notify-send` notifications
-RUN apt -qqy update \
-  && apt -qqy install \
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
     fluxbox \
     xfce4-notifyd \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #============================
 # Xvfb X virtual framebuffer
@@ -316,21 +317,21 @@ RUN apt -qqy update \
 # xvfb: Xvfb or X virtual framebuffer is a display server
 #  + implements the X11 display server protocol
 #  + performs all graphical operations in memory
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
     xvfb \
     xorg \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #============
 # VNC Server
 #============
-RUN apt -qqy update \
-  && apt -qqy install \
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
     x11vnc \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #===================================================
 # Run the following commands as non-privileged user
@@ -370,11 +371,11 @@ USER root
 #   for mp4 & html5 video browser support: https://www.youtube.com/html5
 # TODO: Add test to see what the browser supports by opening
 #       https://www.youtube.com/html5
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
     gstreamer1.0-libav \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #========
 # ffmpeg
@@ -382,12 +383,12 @@ RUN apt -qqy update \
 # MP4Box (gpac) to clean the video credits to @taskworld @dtinth
 # ffmpeg (ffmpeg): Is a better alternative to Pyvnc2swf
 #   (use in Ubuntu >= 15) packages: ffmpeg
-RUN apt -qqy update \
-  && apt -qqy install \
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
     ffmpeg \
     gpac \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 # ------------------------#
 # Sauce Connect Tunneling #
@@ -408,11 +409,11 @@ RUN apt -qqy update \
     # libasound2 \
     # libpulse-dev \
     # xul-ext-ubufox \
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
+RUN apt-get -qqy update \
+  && apt-get -qqy --no-install-recommends install \
     `apt-cache depends firefox | awk '/Depends:/{print$2}'` \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+  && apt-get -qqy clean
 
 #===================================================
 # Run the following commands as non-privileged user
@@ -424,25 +425,21 @@ USER seluser
 #=============================
 USER root
 
-ENV FF_LANG="en-US" \
-    FF_BASE_URL="https://archive.mozilla.org/pub" \
-    FF_PLATFORM="linux-x86_64" \
-    FF_INNER_PATH="firefox/releases"
-
-ARG FF_VER="88.0.1"
-
-ENV FF_COMP="firefox-${FF_VER}.tar.bz2"
-ENV FF_URL="${FF_BASE_URL}/${FF_INNER_PATH}/${FF_VER}/${FF_PLATFORM}/${FF_LANG}/${FF_COMP}"
-RUN cd /opt \
-  && wget -nv "${FF_URL}" -O "firefox.tar.bz2" \
-  && bzip2 -d "firefox.tar.bz2" \
-  && tar xf "firefox.tar" \
-  && rm "firefox.tar" \
-  && ln -fs /opt/firefox/firefox /usr/bin/firefox \
-  && chown -R seluser:seluser /opt/firefox \
-  && chmod -R 777 /opt/firefox
-
-LABEL selenium_firefox_version "${FF_VER}"
+#=========
+# Firefox
+#=========
+ARG FIREFOX_VERSION=latest
+RUN FIREFOX_DOWNLOAD_URL=$(if [ $FIREFOX_VERSION = "latest" ] || [ $FIREFOX_VERSION = "nightly-latest" ] || [ $FIREFOX_VERSION = "devedition-latest" ] || [ $FIREFOX_VERSION = "esr-latest" ]; then echo "https://download.mozilla.org/?product=firefox-$FIREFOX_VERSION-ssl&os=linux64&lang=en-US"; else echo "https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2"; fi) \
+  && apt-get update -qqy \
+  && apt-get -qqy --no-install-recommends install firefox libavcodec-extra \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+  && wget --no-verbose -O /tmp/firefox.tar.bz2 $FIREFOX_DOWNLOAD_URL \
+  && apt-get -y purge firefox \
+  && rm -rf /opt/firefox \
+  && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
+  && rm /tmp/firefox.tar.bz2 \
+  && mv /opt/firefox /opt/firefox-$FIREFOX_VERSION \
+  && ln -fs /opt/firefox-$FIREFOX_VERSION/firefox /usr/bin/firefox
 
 #============
 # GeckoDriver
@@ -461,35 +458,28 @@ RUN wget --no-verbose -O geckodriver.tar.gz \
 
 COPY bin/fail /usr/bin/
 
-#===============
+#============================================
 # Google Chrome
-#===============
-# TODO: Use Google fingerprint to verify downloads
-#  https://www.google.de/linuxrepositories/
-ARG EXPECTED_CHROME_VERSION="91.0.4472.77"
-ENV CHROME_URL="https://dl.google.com/linux/direct" \
-    CHROME_BASE_DEB_PATH="/home/seluser/chrome-deb/google-chrome" \
-    GREP_ONLY_NUMS_VER="[0-9.]{2,20}"
-
-LABEL selenium_chrome_version "${EXPECTED_CHROME_VERSION}"
-
-RUN apt -qqy update \
-  && mkdir -p chrome-deb \
-  && wget -nv "${CHROME_URL}/google-chrome-stable_current_amd64.deb" \
-          -O "./chrome-deb/google-chrome-stable_current_amd64.deb" \
-  && apt -qyy --no-install-recommends install \
-        "${CHROME_BASE_DEB_PATH}-stable_current_amd64.deb" \
-  && rm "${CHROME_BASE_DEB_PATH}-stable_current_amd64.deb" \
-  && rm -rf ./chrome-deb \
-  && apt -qyy autoremove \
+#============================================
+# can specify versions by CHROME_VERSION;
+#  e.g. google-chrome-stable=53.0.2785.101-1
+#       google-chrome-beta=53.0.2785.92-1
+#       google-chrome-unstable=54.0.2840.14-1
+#       latest (equivalent to google-chrome-stable)
+#       google-chrome-beta  (pull latest beta)
+#============================================
+ARG CHROME_VERSION="google-chrome-stable"
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+  && apt-get update -qqy \
+  && apt-get -qqy --no-install-recommends install \
+    ${CHROME_VERSION:-google-chrome-stable} \
+  && rm /etc/apt/sources.list.d/google-chrome.list \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+  && apt-get -qqy autoremove \
   && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean \
-  && export CH_STABLE_VER=$(/usr/bin/google-chrome-stable --version | grep -iEo "${GREP_ONLY_NUMS_VER}") \
-  && echo "CH_STABLE_VER:'${CH_STABLE_VER}' vs EXPECTED_CHROME_VERSION:'${EXPECTED_CHROME_VERSION}'" \
-  && [ "${CH_STABLE_VER}" = "${EXPECTED_CHROME_VERSION}" ] || fail
+  && apt-get -qqy clean \
 
-# We have a wrapper for /opt/google/chrome/google-chrome
-RUN mv /opt/google/chrome/google-chrome /opt/google/chrome/google-chrome-base
 COPY selenium-node-chrome/opt /opt
 COPY lib/* /usr/lib/
 
@@ -504,25 +494,24 @@ RUN chown -R seluser:seluser /usr/share/images/fluxbox/ \
 #===================================================
 USER seluser
 
-#==================
+#============================================
 # Chrome webdriver
-#==================
-# How to get cpu arch dynamically: $(lscpu | grep Architecture | sed "s/^.*_//")
-ARG CHROME_DRIVER_VERSION="91.0.4472.19"
-ENV CHROME_DRIVER_BASE="chromedriver.storage.googleapis.com" \
-    CPU_ARCH="64"
-ENV CHROME_DRIVER_FILE="chromedriver_linux${CPU_ARCH}.zip"
-ENV CHROME_DRIVER_URL="https://${CHROME_DRIVER_BASE}/${CHROME_DRIVER_VERSION}/${CHROME_DRIVER_FILE}"
-# Gets latest chrome driver version. Or you can hard-code it, e.g. 2.15
-RUN  wget -nv -O chromedriver_linux${CPU_ARCH}.zip ${CHROME_DRIVER_URL} \
-  && unzip chromedriver_linux${CPU_ARCH}.zip \
-  && rm chromedriver_linux${CPU_ARCH}.zip \
-  && mv chromedriver \
-        chromedriver-${CHROME_DRIVER_VERSION} \
-  && chmod 755 chromedriver-${CHROME_DRIVER_VERSION} \
-  && ln -s chromedriver-${CHROME_DRIVER_VERSION} \
-           chromedriver \
+#============================================
+# can specify versions by CHROME_DRIVER_VERSION
+# Latest released version will be used by default
+#============================================
+ARG CHROME_DRIVER_VERSION
+RUN if [ -z "$CHROME_DRIVER_VERSION" ]; \
+  then CHROME_MAJOR_VERSION=$(google-chrome --version | sed -E "s/.* ([0-9]+)(\.[0-9]+){3}.*/\1/") \
+    && CHROME_DRIVER_VERSION=$(wget --no-verbose -O - "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}"); \
+  fi \
+  && echo "Using chromedriver version: "$CHROME_DRIVER_VERSION \
+  && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
+  && unzip -o /tmp/chromedriver_linux64.zip -d /home/seluser \
+  && rm /tmp/chromedriver_linux64.zip \
+  && chmod 755 /home/seluser/chromedriver \
   && sudo ln -s /home/seluser/chromedriver /usr/bin
+#============================================
 
 #=================
 # Supervisor conf
